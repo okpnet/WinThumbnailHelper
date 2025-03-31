@@ -1,5 +1,9 @@
 ﻿using System.Drawing;
+using System.Drawing.Imaging;
+using System.IO;
+using System.Net.WebSockets;
 using System.Reflection;
+using WinThumbnailHelper.Extensions;
 
 namespace WinThumbnailHelper
 {
@@ -22,59 +26,49 @@ namespace WinThumbnailHelper
             Exceptions = exceptions;
         }
 
-        public void SetTumbnail(Rectangle trimmingRectangle,int maxsidelength)
+        public static async Task<ImageDecorator> CreateAsync(string bitmapPath,int maxsidelength)
         {
-            if(_thumbnail is not null)
+            var result=await Task.Run(() =>
             {
-                _thumbnail.Dispose();
-            }
-            try
-            {
-                imageLock.EnterReadLock();
-                using var image = GetImage(_imagePath);
-                Image thumbnail = new Bitmap(trimmingRectangle.Width,trimmingRectangle.Height);
-                using var g = Graphics.FromImage(thumbnail);
-                g.DrawImage(image, trimmingRectangle);
-                _thumbnail = thumbnail.CreateThumbnail(maxsidelength);
-            }
-            finally
-            {
-                imageLock?.ExitReadLock();
-            }
-        }
-
-        public Image GetImage()=>GetImage(_imagePath);
-
-        public static ImageDecorator Create(string bitmapPath,int maxsidelength)
-        {
-            try
-            {
-                Image bitmap = GetImage(bitmapPath!);
-                var thumbnail = bitmap.CreateThumbnail(maxsidelength);
-                return new ImageDecorator(bitmapPath, thumbnail, null);
-            }
-            catch (Exception ex)
-            {
-                return new ImageDecorator(string.Empty,default!,ex);
-            }
-        }
-
-        private static Bitmap GetImage(string path)
-        {
-            try
-            {
-                imageLock.EnterReadLock();
-                if (File.Exists(path))
+                try
                 {
-                    return new Bitmap(path!);
+                    var isSuccess = bitmapPath is not (null or "") && System.IO.File.Exists(bitmapPath);
+                    Image bitmap = isSuccess ? new Bitmap(bitmapPath!) : GetDefaultImage();
+                    var thumbnail = bitmap.CreateThumbnail(maxsidelength);
+                    return new ImageDecorator(bitmapPath??string.Empty, thumbnail, isSuccess ? null : new FileNotFoundException(bitmapPath));
                 }
-                using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(WinThumbnailHelper)}.Asset.noimage.bmp");
-                return new Bitmap(stream!);
-            }
-            finally
+                catch (Exception ex)
+                {
+                    return new ImageDecorator(bitmapPath??string.Empty, new Bitmap(0, 0), ex);
+                }
+            });
+            return result;
+        }
+
+        public static async Task<ImageDecorator> CreateAsync(Image image, int maxsidelength)
+        {
+            var result = await Task.Run(() =>
             {
-                imageLock.ExitReadLock();
-            }
+                try
+                {
+                    using var memstream = new MemoryStream();
+                    image.Save(memstream, System.Drawing.Imaging.ImageFormat.Bmp);
+                    var bitmap = new Bitmap(memstream);
+                    var thumbnail = bitmap.CreateThumbnail(maxsidelength);
+                    return new ImageDecorator(string.Empty, thumbnail, null);
+                }
+                catch (Exception ex)
+                {
+                    return new ImageDecorator(string.Empty, new Bitmap(0, 0), ex);
+                }
+            });
+            return result;
+        }
+
+        private static Bitmap GetDefaultImage()
+        {
+            using var stream = Assembly.GetExecutingAssembly().GetManifestResourceStream($"{nameof(WinThumbnailHelper)}.Assets.noimage.bmp");
+            return new Bitmap(stream!);
         }
 
         public void Dispose()

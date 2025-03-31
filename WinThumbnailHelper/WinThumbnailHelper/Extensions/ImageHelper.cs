@@ -1,13 +1,13 @@
 ﻿using System.Drawing;
 
-namespace WinThumbnailHelper
+namespace WinThumbnailHelper.Extensions
 {
     public static class ImageHelper
     {
         internal static Size ChangeScaleRatio(this Image image, int maxSide)
         {
             var resultSize = image.Width > image.Height ?
-                new Size(maxSide, (int)(image.Height / (float)maxSide)) : new Size((int)(image.Width / (float)maxSide), maxSide);
+                new Size(maxSide, (int)(image.Height * (float)maxSide / image.Width)) : new Size((int)(image.Width * (float)maxSide / image.Width), maxSide);
             return resultSize;
         }
         /// <summary>
@@ -18,8 +18,8 @@ namespace WinThumbnailHelper
         /// <returns></returns>
         public static Image CreateThumbnail(this Image image, int maxsize)
         {
-            var size=image.ChangeScaleRatio(maxsize);
-            return image.GetThumbnailImage(size.Width,size.Height,null, nint.Zero);
+            var size = image.ChangeScaleRatio(maxsize);
+            return image.GetThumbnailImage(size.Width, size.Height, null, nint.Zero);
         }
     }
 }

@@ -10,12 +10,10 @@ namespace WinThumbnailHelper
     public interface IImageDecorator
     {
         public string ImageFilePath { get; }
+
         public Image Thumbnail { get; }
 
         public Exception? Exceptions { get; }
 
-        void SetTumbnail(Rectangle trimmingRectangle, int ratio);
-
-        Image GetImage();
     }
 }
