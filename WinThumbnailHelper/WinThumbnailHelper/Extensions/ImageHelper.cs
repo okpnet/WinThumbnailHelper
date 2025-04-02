@@ -7,7 +7,7 @@ namespace WinThumbnailHelper.Extensions
         internal static Size ChangeScaleRatio(this Image image, int maxSide)
         {
             var resultSize = image.Width > image.Height ?
-                new Size(maxSide, (int)(image.Height * (float)maxSide / image.Width)) : new Size((int)(image.Width * (float)maxSide / image.Width), maxSide);
+                new Size(maxSide, (int)(image.Height * (float)maxSide / image.Width)) : new Size((int)(image.Width * (float)maxSide / image.Height), maxSide);
             return resultSize;
         }
         /// <summary>
