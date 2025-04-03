@@ -35,11 +35,34 @@ namespace WinThumbnailHelper
                     var isSuccess = bitmapPath is not (null or "") && System.IO.File.Exists(bitmapPath);
                     Image bitmap = isSuccess ? new Bitmap(bitmapPath!) : GetDefaultImage();
                     var thumbnail = bitmap.CreateThumbnail(maxsidelength);
+                    bitmap.Dispose();
                     return new ImageDecorator(bitmapPath??string.Empty, thumbnail, isSuccess ? null : new FileNotFoundException(bitmapPath));
                 }
                 catch (Exception ex)
                 {
                     return new ImageDecorator(bitmapPath??string.Empty, new Bitmap(0, 0), ex);
+                }
+            });
+            return result;
+        }
+
+        public static async Task<ImageDecorator> CreateAsync(string bitmapPath,Rectangle rectangle, int maxsidelength)
+        {
+            var result = await Task.Run(() =>
+            {
+                try
+                {
+                    var isSuccess = bitmapPath is not (null or "") && System.IO.File.Exists(bitmapPath);
+                    var  baseImage = isSuccess ? new Bitmap(bitmapPath!) : GetDefaultImage();
+                    var bitmap=baseImage.Clone(rectangle, baseImage.PixelFormat);
+                    var thumbnail = bitmap.CreateThumbnail(maxsidelength);
+                    baseImage.Dispose();
+                    bitmap.Dispose();
+                    return new ImageDecorator(bitmapPath ?? string.Empty, thumbnail, isSuccess ? null : new FileNotFoundException(bitmapPath));
+                }
+                catch (Exception ex)
+                {
+                    return new ImageDecorator(bitmapPath ?? string.Empty, new Bitmap(0, 0), ex);
                 }
             });
             return result;
