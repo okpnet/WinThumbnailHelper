@@ -26,6 +26,7 @@ namespace WinThumbnailHelper
             Exceptions = exceptions;
         }
 
+
         public static async Task<ImageDecorator> CreateAsync(string bitmapPath,int maxsidelength)
         {
             var result=await Task.Run(() =>
@@ -40,7 +41,8 @@ namespace WinThumbnailHelper
                 }
                 catch (Exception ex)
                 {
-                    return new ImageDecorator(bitmapPath??string.Empty, new Bitmap(0, 0), ex);
+                    var defaultImage=GetDefaultImage();
+                    return new ImageDecorator(bitmapPath??string.Empty, defaultImage, ex);
                 }
             });
             return result;
@@ -62,7 +64,8 @@ namespace WinThumbnailHelper
                 }
                 catch (Exception ex)
                 {
-                    return new ImageDecorator(bitmapPath ?? string.Empty, new Bitmap(0, 0), ex);
+                    var defaultImage = GetDefaultImage();
+                    return new ImageDecorator(bitmapPath ?? string.Empty, defaultImage, ex);
                 }
             });
             return result;
