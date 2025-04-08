@@ -105,7 +105,7 @@ namespace WinThumbnailHelper
             }
             try{
                 imageLock.EnterWriteLock();
-                File.Delete(_imagePath);
+                //File.Delete(_imagePath);
             }finally 
             {
                 imageLock.ExitWriteLock(); 
