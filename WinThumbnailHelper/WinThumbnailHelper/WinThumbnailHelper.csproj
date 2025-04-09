@@ -4,6 +4,9 @@
     <TargetFramework>net8.0-windows</TargetFramework>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
+    <Authors>hayato takahashi</Authors>
+    <Company>hayato takahashi</Company>
+    <Product>winthumbnaillib</Product>
   </PropertyGroup>
 
   <ItemGroup>
